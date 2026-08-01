@@ -4,8 +4,34 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OS="$(uname -s)"
+BIN_DIR="$HOME/.local/bin"
 
 info() { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
+
+# Downloads the newest GitHub release asset of $repo whose URL matches
+# $pattern, extracts it, and installs the $bin_name executable it contains
+# into $BIN_DIR. Used for tools that apt doesn't reliably package
+# (zellij/lazygit/difftastic are missing or too old on many Ubuntu releases).
+install_binary_release() {
+  local repo="$1" pattern="$2" bin_name="$3"
+  local url tmp
+  url="$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" \
+    | grep -o '"browser_download_url": *"[^"]*"' \
+    | cut -d'"' -f4 \
+    | grep "$pattern" \
+    | head -n1)"
+  if [[ -z "$url" ]]; then
+    echo "Could not find a release asset for $repo matching '$pattern'" >&2
+    return 1
+  fi
+  info "Installing ${bin_name} from ${url}..."
+  tmp="$(mktemp -d)"
+  curl -fsSL "$url" -o "$tmp/asset.tar.gz"
+  tar -xzf "$tmp/asset.tar.gz" -C "$tmp"
+  mkdir -p "$BIN_DIR"
+  install -m 755 "$(find "$tmp" -type f -name "$bin_name")" "$BIN_DIR/$bin_name"
+  rm -rf "$tmp"
+}
 
 # --- Packages ---------------------------------------------------------------
 case "$OS" in
@@ -24,9 +50,21 @@ case "$OS" in
     brew install neovim zellij zsh lazygit difftastic
     ;;
   Linux)
-    info "Installing neovim, zellij, zsh, lazygit, difftastic, git, curl (apt)..."
+    info "Installing neovim, zsh, git, curl (apt)..."
     sudo apt-get update
-    sudo apt-get install -y neovim zellij zsh lazygit difftastic git curl
+    sudo apt-get install -y neovim zsh git curl
+
+    # zellij, lazygit, and difftastic are missing (or too old) in many
+    # Ubuntu apt repos, so grab prebuilt binaries straight from GitHub
+    # releases instead.
+    case "$(uname -m)" in
+      x86_64) lazygit_arch=x86_64 ;;
+      aarch64|arm64) lazygit_arch=arm64 ;;
+      *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+    esac
+    install_binary_release "zellij-org/zellij" "/zellij-$(uname -m)-unknown-linux-musl.tar.gz" zellij
+    install_binary_release "jesseduffield/lazygit" "_linux_${lazygit_arch}.tar.gz" lazygit
+    install_binary_release "Wilfred/difftastic" "/difft-$(uname -m)-unknown-linux-gnu.tar.gz" difft
     ;;
   *)
     echo "Unsupported OS: $OS" >&2

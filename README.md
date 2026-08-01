@@ -14,8 +14,11 @@ cd ~/Projects/dotfiles
 
 This will:
 
-1. Install neovim, zellij, zsh, lazygit, and difftastic — via Homebrew on macOS,
-   via `apt` on Linux.
+1. Install neovim, zsh, lazygit, and difftastic. On macOS all five (plus zellij) come
+   from Homebrew. On Linux, neovim/zsh come from `apt`; zellij, lazygit, and difftastic
+   are downloaded as prebuilt binaries straight from their GitHub releases into
+   `~/.local/bin`, since Ubuntu's apt repos don't reliably carry them (missing or too old
+   depending on release).
 2. Install the [pure](https://github.com/sindresorhus/pure) prompt by cloning it to
    `~/.zsh/pure` (not reliably packaged by either brew or apt, so it's handled the
    same way on both platforms).
