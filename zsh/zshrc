@@ -1,10 +1,6 @@
-# --- Homebrew ---------------------------------------------------------
-# Apple Silicon macOS, Intel macOS, and Linuxbrew all live in different
-# prefixes; pick whichever exists.
+# --- Homebrew (macOS only) -------------------------------------------------
 if [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 elif [[ -x /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
@@ -20,9 +16,7 @@ plugins=(git)
 source "$ZSH/oh-my-zsh.sh"
 
 # --- Pure prompt ----------------------------------------------------------
-if command -v brew >/dev/null 2>&1; then
-  fpath+=("$(brew --prefix)/share/zsh/site-functions")
-fi
+fpath+=("$HOME/.zsh/pure")
 autoload -Uz promptinit && promptinit
 prompt pure
 

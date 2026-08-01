@@ -14,9 +14,11 @@ cd ~/Projects/dotfiles
 
 This will:
 
-1. Install [Homebrew](https://brew.sh) if it's not already present (used as the package
-   manager on both macOS and Linux, via [Linuxbrew](https://docs.brew.sh/Homebrew-on-Linux)).
-2. `brew install` neovim, zellij, zsh, pure, lazygit, and difftastic.
+1. Install neovim, zellij, zsh, lazygit, and difftastic — via Homebrew on macOS,
+   via `apt` on Linux.
+2. Install the [pure](https://github.com/sindresorhus/pure) prompt by cloning it to
+   `~/.zsh/pure` (not reliably packaged by either brew or apt, so it's handled the
+   same way on both platforms).
 3. Install Oh My Zsh (unattended).
 4. Symlink:
    - `zsh/zshrc` → `~/.zshrc`

@@ -7,36 +7,45 @@ OS="$(uname -s)"
 
 info() { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
 
-# --- Homebrew -------------------------------------------------------------
-# Used as the single package manager on both macOS and Linux so package
-# names and versions (neovim, zellij, pure) don't have to be tracked
-# per-distro.
-if [[ "$OS" == "Linux" ]] && ! command -v brew >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
-  info "Installing Homebrew build prerequisites (apt)..."
-  sudo apt-get update
-  sudo apt-get install -y build-essential procps curl file git
-fi
-
-if ! command -v brew >/dev/null 2>&1; then
-  info "Installing Homebrew..."
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-
-for prefix in /opt/homebrew /home/linuxbrew/.linuxbrew /usr/local; do
-  if [[ -x "$prefix/bin/brew" ]]; then
-    eval "$("$prefix/bin/brew" shellenv)"
-    break
-  fi
-done
-
-if ! command -v brew >/dev/null 2>&1; then
-  echo "Homebrew is not on PATH after installation; aborting." >&2
-  exit 1
-fi
-
 # --- Packages ---------------------------------------------------------------
-info "Installing neovim, zellij, zsh, pure, lazygit, difftastic..."
-brew install neovim zellij zsh pure lazygit difftastic
+case "$OS" in
+  Darwin)
+    if ! command -v brew >/dev/null 2>&1; then
+      info "Installing Homebrew..."
+      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+    for prefix in /opt/homebrew /usr/local; do
+      if [[ -x "$prefix/bin/brew" ]]; then
+        eval "$("$prefix/bin/brew" shellenv)"
+        break
+      fi
+    done
+    info "Installing neovim, zellij, zsh, lazygit, difftastic (brew)..."
+    brew install neovim zellij zsh lazygit difftastic
+    ;;
+  Linux)
+    info "Installing neovim, zellij, zsh, lazygit, difftastic, git, curl (apt)..."
+    sudo apt-get update
+    sudo apt-get install -y neovim zellij zsh lazygit difftastic git curl
+    ;;
+  *)
+    echo "Unsupported OS: $OS" >&2
+    exit 1
+    ;;
+esac
+
+# --- Pure prompt ----------------------------------------------------------
+# Installed the same way on both platforms (not packaged consistently by
+# apt or brew), so the zshrc fpath logic doesn't need an OS branch.
+PURE_DIR="$HOME/.zsh/pure"
+if [[ -d "$PURE_DIR/.git" ]]; then
+  info "Updating pure prompt..."
+  git -C "$PURE_DIR" pull --ff-only -q
+else
+  info "Installing pure prompt..."
+  mkdir -p "$(dirname "$PURE_DIR")"
+  git clone -q https://github.com/sindresorhus/pure.git "$PURE_DIR"
+fi
 
 # --- Oh My Zsh --------------------------------------------------------------
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
@@ -54,11 +63,11 @@ ln -sf "$DOTFILES_DIR/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"
 ln -sf "$DOTFILES_DIR/git/gitconfig" "$HOME/.gitconfig"
 
 # --- Default shell -----------------------------------------------------
-BREW_ZSH="$(command -v zsh)"
-if [[ "${SHELL:-}" != "$BREW_ZSH" ]]; then
-  info "Setting zsh ($BREW_ZSH) as the default shell..."
-  grep -qx "$BREW_ZSH" /etc/shells 2>/dev/null || echo "$BREW_ZSH" | sudo tee -a /etc/shells >/dev/null
-  chsh -s "$BREW_ZSH" || info "Could not chsh automatically; run 'chsh -s $BREW_ZSH' manually."
+ZSH_BIN="$(command -v zsh)"
+if [[ "${SHELL:-}" != "$ZSH_BIN" ]]; then
+  info "Setting zsh ($ZSH_BIN) as the default shell..."
+  grep -qx "$ZSH_BIN" /etc/shells 2>/dev/null || echo "$ZSH_BIN" | sudo tee -a /etc/shells >/dev/null
+  chsh -s "$ZSH_BIN" || info "Could not chsh automatically; run 'chsh -s $ZSH_BIN' manually."
 fi
 
 info "Done. Restart your terminal or run: exec zsh"
