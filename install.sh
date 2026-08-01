@@ -51,6 +51,7 @@ ln -sf "$DOTFILES_DIR/zsh/zshrc" "$HOME/.zshrc"
 ln -sfn "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 mkdir -p "$HOME/.config/zellij"
 ln -sf "$DOTFILES_DIR/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"
+ln -sf "$DOTFILES_DIR/git/gitconfig" "$HOME/.gitconfig"
 
 # --- Default shell -----------------------------------------------------
 BREW_ZSH="$(command -v zsh)"
