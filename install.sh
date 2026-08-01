@@ -35,8 +35,8 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 # --- Packages ---------------------------------------------------------------
-info "Installing neovim, zellij, zsh, pure..."
-brew install neovim zellij zsh pure
+info "Installing neovim, zellij, zsh, pure, lazygit, difftastic..."
+brew install neovim zellij zsh pure lazygit difftastic
 
 # --- Oh My Zsh --------------------------------------------------------------
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
