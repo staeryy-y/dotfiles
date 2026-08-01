@@ -1,0 +1,35 @@
+# --- Homebrew ---------------------------------------------------------
+# Apple Silicon macOS, Intel macOS, and Linuxbrew all live in different
+# prefixes; pick whichever exists.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+# --- Oh My Zsh ----------------------------------------------------------
+export ZSH="$HOME/.oh-my-zsh"
+
+# The pure prompt (below) replaces the Oh My Zsh theme.
+ZSH_THEME=""
+
+plugins=(git)
+
+source "$ZSH/oh-my-zsh.sh"
+
+# --- Pure prompt ----------------------------------------------------------
+if command -v brew >/dev/null 2>&1; then
+  fpath+=("$(brew --prefix)/share/zsh/site-functions")
+fi
+autoload -Uz promptinit && promptinit
+prompt pure
+
+# --- Editor / aliases -----------------------------------------------------
+export EDITOR="nvim"
+export VISUAL="nvim"
+alias vim="nvim"
+
+# --- User configuration ---------------------------------------------------
+export PATH="$PATH:$HOME/.local/bin"
