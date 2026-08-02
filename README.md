@@ -6,13 +6,21 @@ Personal terminal setup: neovim, zsh (Oh My Zsh + [pure](https://github.com/sind
 
 ## Install
 
+One-liner, on a fresh macOS or Ubuntu machine:
+
 ```sh
-git clone <this-repo-url> ~/Projects/dotfiles
-cd ~/Projects/dotfiles
+curl -fsSL https://raw.githubusercontent.com/staeryy-y/dotfiles/main/bootstrap.sh | bash
+```
+
+This clones the repo to `~/.dotfiles` (override with `DOTFILES_DIR=...`) and runs
+`install.sh`. Or, if you already have the repo checked out:
+
+```sh
+cd dotfiles
 ./install.sh
 ```
 
-This will:
+Either way, `install.sh` will:
 
 1. Install neovim, zsh, lazygit, and difftastic. On macOS all five (plus zellij) come
    from Homebrew. On Linux, neovim/zsh come from `apt`; zellij, lazygit, and difftastic
@@ -38,4 +46,6 @@ Re-run `./install.sh` any time — every step is idempotent.
 - `zsh/zshrc` — shell config: Oh My Zsh + pure prompt.
 - `zellij/config.kdl` — zellij config (custom vim-style keybinds).
 - `git/gitconfig` — git config, `git diff`/`git show`/`git log -p` piped through difftastic.
-- `install.sh` — bootstrap script, detects macOS vs Linux.
+- `install.sh` — installs everything and symlinks dotfiles, detects macOS vs Linux.
+- `bootstrap.sh` — fetches this repo (via git, or a tarball if git isn't installed yet)
+  and runs `install.sh`; this is what the one-liner above downloads and runs.
